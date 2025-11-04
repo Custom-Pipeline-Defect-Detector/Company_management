@@ -1,0 +1,154 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f4f6fb;
+  color: #1f2937;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.app__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.app__header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.refresh {
+  background: #2563eb;
+  border: none;
+  border-radius: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0.6rem 1rem;
+  transition: background 120ms ease-in-out;
+}
+
+.refresh:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.refresh:not(:disabled):hover {
+  background: #1d4ed8;
+}
+
+.alert {
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.story-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.story-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.story-card p {
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.story-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.story-meta span {
+  background: #e0e7ff;
+  color: #312e81;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.story-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.story-actions a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.detail-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem;
+}
+
+.detail-card h2 {
+  margin-top: 0;
+}
+
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.detail-meta strong {
+  color: #111827;
+}
+
+.placeholder {
+  text-align: center;
+  color: #6b7280;
+  padding: 3rem 1rem;
+  border: 2px dashed #cbd5f5;
+  border-radius: 0.75rem;
+}
+
+.loading {
+  font-style: italic;
+  color: #64748b;
+}

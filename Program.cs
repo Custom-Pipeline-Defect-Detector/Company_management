@@ -16,22 +16,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+var webRoot = builder.Environment.WebRootPath;
+if (string.IsNullOrEmpty(webRoot))
+{
+    webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+    builder.Environment.WebRootPath = webRoot;
+}
+
+Directory.CreateDirectory(webRoot);
+
+var uploadsPath = Path.Combine(webRoot, "uploads");
+Directory.CreateDirectory(uploadsPath);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
- app.UseDeveloperExceptionPage();
+    app.UseDeveloperExceptionPage();
 }
 
+app.UseDefaultFiles();
 app.UseStaticFiles();
-var webRoot = builder.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
 app.UseStaticFiles(new StaticFileOptions
 {
- FileProvider = new PhysicalFileProvider(
- Path.Combine(webRoot, "uploads")),
- RequestPath = "/uploads"
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
 });
 
 app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 app.Run();
