@@ -1,6 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router';
 import StoryListView from './views/StoryListView.js';
 import IssueDetailView from './views/IssueDetailView.js';
+
+if (!window.VueRouter) {
+  throw new Error('Vue Router failed to load.');
+}
+
+const { createRouter, createWebHistory } = window.VueRouter;
 
 const routes = [
   { path: '/', name: 'stories', component: StoryListView },

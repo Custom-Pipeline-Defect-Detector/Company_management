@@ -1,5 +1,10 @@
-import { computed, onMounted } from 'vue';
 import { useStore } from '../store.js';
+
+if (!window.Vue) {
+  throw new Error('Vue failed to load.');
+}
+
+const { computed, onMounted } = window.Vue;
 
 export default {
   name: 'StoryListView',

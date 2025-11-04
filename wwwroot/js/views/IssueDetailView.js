@@ -1,6 +1,11 @@
-import { computed, onMounted, ref, watch } from 'vue';
-import axios from 'axios';
 import { useStore } from '../store.js';
+
+if (!window.Vue || !window.axios) {
+  throw new Error('Vue or Axios failed to load.');
+}
+
+const { computed, onMounted, ref, watch } = window.Vue;
+const http = window.axios;
 
 export default {
   name: 'IssueDetailView',
@@ -33,7 +38,7 @@ export default {
       error.value = null;
 
       try {
-        const response = await axios.get(`/api/stories/${numericId}`);
+        const response = await http.get(`/api/stories/${numericId}`);
         story.value = response.data;
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Unable to load story';

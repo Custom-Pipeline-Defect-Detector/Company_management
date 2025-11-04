@@ -1,5 +1,9 @@
-import { defineStore } from 'pinia';
-import axios from 'axios';
+if (!window.Pinia || !window.axios) {
+  throw new Error('Pinia or Axios failed to load.');
+}
+
+const { defineStore } = window.Pinia;
+const http = window.axios;
 
 export const useStore = defineStore('main', {
   state: () => ({
@@ -15,7 +19,7 @@ export const useStore = defineStore('main', {
       this.lastError = null;
 
       try {
-        const response = await axios.get('/api/stories');
+        const response = await http.get('/api/stories');
         this.stories = response.data;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';

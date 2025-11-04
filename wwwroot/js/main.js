@@ -1,6 +1,11 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
 import router from './router.js';
+
+if (!window.Vue || !window.Pinia || !window.VueRouter) {
+  throw new Error('Front-end dependencies failed to load.');
+}
+
+const { createApp } = window.Vue;
+const { createPinia } = window.Pinia;
 
 const App = {
   template: `
