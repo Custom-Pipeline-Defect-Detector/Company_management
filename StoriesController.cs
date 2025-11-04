@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 [ApiController]
 [Route("api/stories")]
@@ -16,48 +16,60 @@ public class StoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllStories()
+    public async Task<ActionResult<IEnumerable<StorySummaryDto>>> GetAllStories()
     {
         var stories = await _context.Stories
             .Include(s => s.Attachments)
             .Include(s => s.Comments)
-            .ThenInclude(c => c.Attachments)
             .Include(s => s.AssignedTo)
+            .AsNoTracking()
             .ToListAsync();
 
-        var result = stories.Select(s => new {
-            s.Id,
-            s.Name,
-            s.Description,
-            Status = s.Status,
-            s.Priority,
-            s.AssignedToId,
-            AssignedTo = s.AssignedTo != null ? new { s.AssignedTo.Id, s.AssignedTo.Name } : null,
-            AttachmentCount = s.Attachments?.Count ??0,
-            CommentCount = s.Comments?.Count ??0
-        });
-
-        return Ok(result);
+        return stories.Select(MapToSummary).ToList();
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetStory(int id)
+    public async Task<ActionResult<StoryDetailDto>> GetStory(int id)
     {
-        var story = _context.Stories
+        var story = await _context.Stories
             .Include(s => s.Attachments)
             .Include(s => s.Comments)
-            .ThenInclude(c => c.Attachments)
-            .FirstOrDefault(s => s.Id == id);
-        if (story == null) return NotFound();
-        return Ok(story);
+                .ThenInclude(c => c.Attachments)
+            .Include(s => s.Comments)
+                .ThenInclude(c => c.User)
+            .Include(s => s.Tasks)
+                .ThenInclude(t => t.Attachments)
+            .Include(s => s.AssignedTo)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (story == null)
+        {
+            return NotFound();
+        }
+
+        return MapToDetail(story);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateStory([FromBody] Story story)
+    public async Task<ActionResult<StoryDetailDto>> CreateStory([FromBody] Story story)
     {
         _context.Stories.Add(story);
         await _context.SaveChangesAsync();
-        return Ok(story);
+
+        var savedStory = await _context.Stories
+            .Include(s => s.Attachments)
+            .Include(s => s.Comments)
+                .ThenInclude(c => c.Attachments)
+            .Include(s => s.Comments)
+                .ThenInclude(c => c.User)
+            .Include(s => s.Tasks)
+                .ThenInclude(t => t.Attachments)
+            .Include(s => s.AssignedTo)
+            .AsNoTracking()
+            .FirstAsync(s => s.Id == story.Id);
+
+        return CreatedAtAction(nameof(GetStory), new { id = savedStory.Id }, MapToDetail(savedStory));
     }
 
     [HttpPut("{id}/status")]
@@ -67,6 +79,50 @@ public class StoriesController : ControllerBase
         if (story == null) return NotFound();
         story.Status = status;
         await _context.SaveChangesAsync();
-        return Ok(story);
+        return NoContent();
     }
+
+    private static StorySummaryDto MapToSummary(Story story) => new(
+        story.Id,
+        story.Name,
+        story.Description,
+        story.Status.ToString(),
+        story.Priority,
+        story.AssignedToId,
+        story.AssignedTo != null ? new UserSummaryDto(story.AssignedTo.Id, story.AssignedTo.Name) : null,
+        story.Attachments?.Count ?? 0,
+        story.Comments?.Count ?? 0);
+
+    private static StoryDetailDto MapToDetail(Story story) => new(
+        story.Id,
+        story.Name,
+        story.Description,
+        story.Status.ToString(),
+        story.Priority,
+        story.AssignedToId,
+        story.AssignedTo != null ? new UserSummaryDto(story.AssignedTo.Id, story.AssignedTo.Name) : null,
+        story.Attachments?.Select(MapAttachment).ToList() ?? new List<AttachmentDto>(),
+        story.Comments?.Select(MapComment).ToList() ?? new List<CommentDto>(),
+        story.Tasks?.Select(MapTask).ToList() ?? new List<TaskDto>());
+
+    private static AttachmentDto MapAttachment(Attachment attachment) => new(
+        attachment.Id,
+        attachment.FileName,
+        attachment.FilePath,
+        attachment.ContentType,
+        attachment.Size,
+        attachment.UploadedAt);
+
+    private static CommentDto MapComment(Comment comment) => new(
+        comment.Id,
+        comment.Text,
+        comment.CreatedAt,
+        comment.User != null ? new UserSummaryDto(comment.User.Id, comment.User.Name) : null,
+        comment.Attachments?.Select(MapAttachment).ToList() ?? new List<AttachmentDto>());
+
+    private static TaskDto MapTask(WorkTask task) => new(
+        task.Id,
+        task.Title,
+        task.Description,
+        task.Attachments?.Select(MapAttachment).ToList() ?? new List<AttachmentDto>());
 }
