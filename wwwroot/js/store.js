@@ -1,5 +1,5 @@
-import { defineStore } from 'https://unpkg.com/pinia@2.1.7/dist/pinia.esm-browser.js';
-import axios from 'https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.esm.min.js';
+import { defineStore } from 'pinia';
+import axios from 'axios';
 
 export const useStore = defineStore('main', {
   state: () => ({

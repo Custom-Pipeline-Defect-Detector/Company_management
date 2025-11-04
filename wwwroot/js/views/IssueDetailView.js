@@ -1,5 +1,5 @@
-import { computed, onMounted, ref, watch } from 'https://unpkg.com/vue@3.3.4/dist/vue.esm-browser.js';
-import axios from 'https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.esm.min.js';
+import { computed, onMounted, ref, watch } from 'vue';
+import axios from 'axios';
 import { useStore } from '../store.js';
 
 export default {

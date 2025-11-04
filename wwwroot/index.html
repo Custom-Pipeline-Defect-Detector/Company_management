@@ -5,9 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Company Management</title>
   <link rel="stylesheet" href="/css/site.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3.3.4/dist/vue.esm-browser.js",
+        "pinia": "https://unpkg.com/pinia@2.1.7/dist/pinia.esm-browser.js",
+        "vue-router": "https://unpkg.com/vue-router@4.2.5/dist/vue-router.esm-browser.js",
+        "axios": "https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.esm.min.js"
+      }
+    }
+  </script>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app">Loading workspace…</div>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

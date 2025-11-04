@@ -1,4 +1,4 @@
-import { computed, onMounted } from 'https://unpkg.com/vue@3.3.4/dist/vue.esm-browser.js';
+import { computed, onMounted } from 'vue';
 import { useStore } from '../store.js';
 
 export default {
