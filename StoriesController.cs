@@ -1,8 +1,10 @@
+using CompanyManagement.Dtos;
+using CompanyManagement.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 [ApiController]
 [Route("api/stories")]
@@ -16,48 +18,47 @@ public class StoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllStories()
+    public async Task<ActionResult<IEnumerable<StorySummaryDto>>> GetAllStories()
     {
         var stories = await _context.Stories
-            .Include(s => s.Attachments)
-            .Include(s => s.Comments)
-            .ThenInclude(c => c.Attachments)
-            .Include(s => s.AssignedTo)
+            .IncludeSummaryDependencies()
+            .AsNoTracking()
+            .OrderBy(story => story.Id)
             .ToListAsync();
 
-        var result = stories.Select(s => new {
-            s.Id,
-            s.Name,
-            s.Description,
-            Status = s.Status,
-            s.Priority,
-            s.AssignedToId,
-            AssignedTo = s.AssignedTo != null ? new { s.AssignedTo.Id, s.AssignedTo.Name } : null,
-            AttachmentCount = s.Attachments?.Count ??0,
-            CommentCount = s.Comments?.Count ??0
-        });
-
-        return Ok(result);
+        return stories
+            .Select(story => story.ToSummaryDto())
+            .ToList();
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetStory(int id)
+    public async Task<ActionResult<StoryDetailDto>> GetStory(int id)
     {
-        var story = _context.Stories
-            .Include(s => s.Attachments)
-            .Include(s => s.Comments)
-            .ThenInclude(c => c.Attachments)
-            .FirstOrDefault(s => s.Id == id);
-        if (story == null) return NotFound();
-        return Ok(story);
+        var story = await _context.Stories
+            .IncludeDetailDependencies()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (story == null)
+        {
+            return NotFound();
+        }
+
+        return story.ToDetailDto();
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateStory([FromBody] Story story)
+    public async Task<ActionResult<StoryDetailDto>> CreateStory([FromBody] Story story)
     {
         _context.Stories.Add(story);
         await _context.SaveChangesAsync();
-        return Ok(story);
+
+        var savedStory = await _context.Stories
+            .IncludeDetailDependencies()
+            .AsNoTracking()
+            .FirstAsync(s => s.Id == story.Id);
+
+        return CreatedAtAction(nameof(GetStory), new { id = savedStory.Id }, savedStory.ToDetailDto());
     }
 
     [HttpPut("{id}/status")]
@@ -67,6 +68,7 @@ public class StoriesController : ControllerBase
         if (story == null) return NotFound();
         story.Status = status;
         await _context.SaveChangesAsync();
-        return Ok(story);
+        return NoContent();
     }
+
 }
